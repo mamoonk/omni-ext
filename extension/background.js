@@ -32,7 +32,7 @@ function hBM(m){
  if(m.type==="studio_status"){rP(m.id,{ok:true,studio:sc});bcast();return}
  if(m.type==="connected"){ma=!!m.mcp_alive;if(Array.isArray(m.tools))tc=m.tools;bcast();return}
  if(m.type==="pong"){rP(m.id,{ok:true});return}
- if(m.type==="tools"){if(Array.isArray(m.tools))tc=m.tools;ma=!!msg.mcp_alive;rP(m.id,{ok:true,tools:tc});bcast();return}
+ if(m.type==="tools"){if(Array.isArray(m.tools))tc=m.tools;ma=!!m.mcp_alive;rP(m.id,{ok:true,tools:tc});bcast();return}
  if(m.type==="tool_result"){rP(m.id,m.ok?{ok:true,text:m.text,images:m.images||[]}:{ok:false,kind:m.kind,error:m.error});return}
  if(m.type==="mcp_status"){ma=!!m.alive;rP(m.id,{ok:!!m.ok,alive:m.alive,error:m.error});bcast();return}
  if(m.type==="error"){rP(m.id,{ok:false,error:m.error})}

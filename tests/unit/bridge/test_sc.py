@@ -8,14 +8,14 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "br
 
 
 class MockMGR:
-    """Simulates MCPM.cl() for testing sc()."""
+    """Simulates MCPM.call() for testing sc()."""
     def __init__(self):
         self.last_name = None
         self.last_args = None
         self.last_timeout = None
         self.result = {"text": "", "images": []}
 
-    def cl(self, name, args, timeout=30):
+    def call(self, name, args, timeout=30):
         self.last_name = name
         self.last_args = args
         self.last_timeout = timeout
@@ -131,7 +131,7 @@ class TestScErrors:
         def timeout_cl(name, args, timeout=30):
             raise TimeoutError("timed out after 30s")
 
-        err_mock.cl = timeout_cl
+        err_mock.call = timeout_cl
         sys.modules["bridge"].mgr = err_mock
         try:
             r = sc("execute_luau", {"code": "x=1"}, 30)
@@ -149,7 +149,7 @@ class TestScErrors:
         def error_cl(name, args, timeout=30):
             raise RuntimeError("unknown tool 'bad_tool'")
 
-        err_mock.cl = error_cl
+        err_mock.call = error_cl
         sys.modules["bridge"].mgr = err_mock
         try:
             r = sc("bad_tool", {}, 30)
@@ -167,7 +167,7 @@ class TestScErrors:
         def error_cl(name, args, timeout=30):
             raise ValueError("something broke")
 
-        err_mock.cl = error_cl
+        err_mock.call = error_cl
         sys.modules["bridge"].mgr = err_mock
         try:
             r = sc("any_tool", {}, 30)

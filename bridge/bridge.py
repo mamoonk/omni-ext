@@ -210,7 +210,7 @@ class MCPM:
       if h is c and rn==n: a=k; break
     tt=dict(t); tt["name"]=a; o.append(tt)
   return o
- def cl(s,n,a,t):
+ def call(s,n,a,t):
   with s.ixl: e=s.idx.get(n)
   if e is None: s._rbi()
   with s.ixl: e=s.idx.get(n)
@@ -326,7 +326,7 @@ def sc(n,a,t):
  if n=="execute_luau" and a.get("code"):
   a=dict(a); a["code"]=_wl(a["code"])
  try:
-  r=mgr.cl(n,a,t)
+  r=mgr.call(n,a,t)
   text=_summarize(r["text"],n)
   return {"ok":True,"text":text,"images":r["images"]}
  except TimeoutError as e: return {"ok":False,"error":str(e),"kind":"timeout"}
