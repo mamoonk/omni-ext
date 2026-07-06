@@ -26,18 +26,18 @@ const ZS = (() => {
     { n: "mouse_input", d: "Simulate mouse. Args: action (click|move|scroll), x, y", i: { action: "string", x: "number", y: "number" } },
     { n: "list_roblox_studios", d: "List connected Studio instances. No args." },
     { n: "set_active_studio", d: "Set active Studio instance. Args: id", i: { id: "string" } },
+    { n: "script_create", d: "Create a new script. Args: path, contents", i: { path: "string", contents: "string" } },
     { n: "explore_subagent", d: "Investigate a place with a sub-agent. A flexible tool. Args: goal", i: { goal: "string" } },
   ];
 
   // SAFE tools from main.js (19 tools that bypass multi_edit approval)
   const SAFE = [
-    "script_read", "script_search", "script_grep", "execute_luau",
+    "script_read", "script_create", "script_search", "script_grep", "execute_luau",
     "inspect_instance", "search_game_tree", "list_roblox_studios",
     "set_active_studio", "generate_mesh", "generate_material",
     "generate_procedural_model", "insert_from_creator_store",
     "start_stop_play", "console_output", "screen_capture",
     "character_navigation", "keyboard_input", "mouse_input",
-    "explore_subagent",
   ];
 
   return { T, SAFE };
@@ -57,7 +57,7 @@ function assertEq(a, b, msg) {
 }
 
 // ── Tool count ──
-assertEq(ZS.T.length, 20, "20 tools defined");
+assertEq(ZS.T.length, 21, "21 tools defined");
 
 // ── SAFE list size (19 safe + multi_edit requires approval = 20 total) ──
 assertEq(ZS.SAFE.length, 19, "19 tools in SAFE list");
@@ -111,7 +111,7 @@ ZS.T.forEach(t => {
 
 // ── Specific tools check ──
 const expectedTools = [
-  "script_read", "multi_edit", "script_search", "script_grep",
+  "script_read", "script_create", "multi_edit", "script_search", "script_grep",
   "execute_luau", "generate_mesh", "generate_material",
   "generate_procedural_model", "insert_from_creator_store",
   "search_game_tree", "inspect_instance", "start_stop_play",

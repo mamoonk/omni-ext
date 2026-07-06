@@ -26,36 +26,42 @@ _reg('chat.z.ai',          { ep: '/api/', mode: 'sse', ctx: (j) => j?.choices?.[
 _reg('chat.qwen.ai',       { ep: '/api/', mode: 'sse', ctx: (j) => j?.choices?.[0]?.delta?.content });
 _reg('arena.ai',           { ep: '/api/', mode: 'sse', ctx: (j) => j?.choices?.[0]?.delta?.content });
 
-// Gemini-specific: parse their nested array response
+// Try to extract text from Gemini's nested array response
 function _geminiParse(raw) {
   try {
     const j = JSON.parse(raw);
+    if (typeof j === 'string') return j;
     // Gemini returns [[["text"],[synth]],...] arrays
     const arr = Array.isArray(j) ? j.flat(10) : [];
     for (const v of arr) {
       if (typeof v === 'string' && v.length > 10) return v;
     }
-    // fallback: find any long string
-    for (const v of arr) {
-      if (typeof v === 'string' && v.length > _acc.length) return v;
+    // also try common fields
+    for (const k of ['text','content','output','response','reply']){
+      const v = j[k];
+      if (typeof v === 'string' && v.length > 5) return v;
     }
-  } catch {}
+  } catch (e) { console.warn('[ZS] Gemini parse:', e.message) }
   return '';
 }
 
-// SSE line reader
+// SSE line reader; falls back to raw JSON if no data: lines found
 async function _readSSE(reader, cfg) {
   const dec = new TextDecoder();
-  let buf = '', out = '';
+  let buf = '', out = '', rawText = '';
+  let foundData = false;
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
-    buf += dec.decode(value, { stream: true });
+    const chunk = dec.decode(value, { stream: true });
+    rawText += chunk;
+    buf += chunk;
     const parts = buf.split('\n');
     buf = parts.pop() || '';
     for (const line of parts) {
       const t = line.trim();
       if (!t.startsWith('data: ')) continue;
+      foundData = true;
       const raw = t.slice(6);
       if (raw === '[DONE]') continue;
       try {
@@ -64,6 +70,16 @@ async function _readSSE(reader, cfg) {
         if (c) out += c;
       } catch {}
     }
+  }
+  // fallback: treat raw response as plain JSON
+  if (!foundData && rawText.trim()) {
+    try {
+      const j = JSON.parse(rawText.trim());
+      const c = cfg.ctx ? cfg.ctx(j) : (j?.choices?.[0]?.delta?.content || j?.choices?.[0]?.text || '');
+      if (c) return c;
+    } catch {}
+    // last resort: return raw string if it looks like text
+    if (rawText.length > 20 && rawText.length < 50000) return rawText;
   }
   return out;
 }

@@ -1,7 +1,8 @@
 const ZS={
 T: [
- {n:"script_read",d:"Read a script. Args: path (dot-notation, e.g. game.ServerScriptService.Foo)",i:{path:"string"}},
- {n:"multi_edit",d:"Edit or create a script. Args: path, edits (array of {line,text})",i:{path:"string",edits:"array"}},
+  {n:"script_read",d:"Read a script. Args: path (dot-notation, e.g. game.ServerScriptService.Foo)",i:{path:"string"}},
+  {n:"script_create",d:"Create a new script. Args: path (full dot-path), contents (string)",i:{path:"string",contents:"string"}},
+  {n:"multi_edit",d:"Edit or create a script. Args: path, edits (array of {line,text})",i:{path:"string",edits:"array"}},
  {n:"script_search",d:"Search scripts by name (fuzzy). Args: query",i:{query:"string"}},
  {n:"script_grep",d:"Search string in all scripts. Args: pattern",i:{pattern:"string"}},
  {n:"execute_luau",d:"Run Luau code in Studio. Args: code",i:{code:"string"}},

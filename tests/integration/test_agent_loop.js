@@ -107,13 +107,12 @@ function testPollingLogic() {
 // ── Test 2: SAFE tool list ──
 function testSafeToolBypass() {
   const SAFE = [
-    "script_read", "script_search", "script_grep", "execute_luau",
+    "script_read", "script_create", "script_search", "script_grep", "execute_luau",
     "inspect_instance", "search_game_tree", "list_roblox_studios",
     "set_active_studio", "generate_mesh", "generate_material",
     "generate_procedural_model", "insert_from_creator_store",
     "start_stop_play", "console_output", "screen_capture",
     "character_navigation", "keyboard_input", "mouse_input",
-    "explore_subagent",
   ];
 
   assert(SAFE.includes("screen_capture"), "screen_capture is safe");

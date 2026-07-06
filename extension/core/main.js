@@ -1,6 +1,6 @@
 (function(){
-let S={active:false,stopping:false,run:false,customPrompt:"",memory:"",_lastSeq:0};
-const SAFE=['script_read','script_search','script_grep','execute_luau','inspect_instance','search_game_tree','list_roblox_studios','set_active_studio','generate_mesh','generate_material','generate_procedural_model','insert_from_creator_store','start_stop_play','console_output','screen_capture','character_navigation','keyboard_input','mouse_input','explore_subagent'];
+let S={active:false,stopping:false,run:false,customPrompt:"",memory:"",_lastSeq:0,_queue:[]};
+const SAFE=['script_read','script_create','script_search','script_grep','execute_luau','inspect_instance','search_game_tree','list_roblox_studios','set_active_studio','generate_mesh','generate_material','generate_procedural_model','insert_from_creator_store','start_stop_play','console_output','screen_capture','character_navigation','keyboard_input','mouse_input'];
 
 function id(n){return `zs-${n}`}
 
@@ -21,8 +21,8 @@ function buildUI(){
  document.body.prepend(bar);
  document.body.style.paddingTop="44px";
  btn.addEventListener("click",()=>S.active?stopSession():startSession());
- more.addEventListener("click",()=>{const p=prompt("Custom instructions:",S.customPrompt);if(p!==null)S.customPrompt=p});
- memo.addEventListener("click",()=>{const p=prompt("Project memory:",S.memory);if(p!==null)S.memory=p});
+  more.addEventListener("click",()=>{const p=prompt("Custom instructions:",S.customPrompt);if(p!==null){S.customPrompt=p;try{chrome.storage.local.set({zsp:S.customPrompt,zsm:S.memory})}catch{}}});
+  memo.addEventListener("click",()=>{const p=prompt("Project memory:",S.memory);if(p!==null){S.memory=p;try{chrome.storage.local.set({zsp:S.customPrompt,zsm:S.memory})}catch{}}});
 }
 function setStatus(dot,label){if(stDot)stDot.style.color=dot;if(stLbl)stLbl.textContent=label}
 function setBtn(text,active){if(!btn)return;btn.textContent=text;btn.style.borderColor=active?"#ff5555":"#7c5cfc";btn.style.color=active?"#ff5555":"#7c5cfc"}
@@ -137,20 +137,21 @@ function _injectImage(base64,text){
  if(el.isContentEditable){
   document.execCommand('insertHTML',false,
    `<img src="data:image/png;base64,${base64}" style="max-width:280px;max-height:200px;border-radius:4px;margin:4px 0"><br>`+text);
- }else{
-  try{
-   const b64=base64.replace(/-/g,'+').replace(/_/g,'/');
-   const raw=atob(b64);
-   const buf=new Uint8Array(raw.length);
-   for(let i=0;i<raw.length;i++)buf[i]=raw.charCodeAt(i);
-   const f=new File([buf],'screenshot.png',{type:'image/png'}),dt=new DataTransfer();
-   dt.items.add(f);
-   el.dispatchEvent(new ClipboardEvent('paste',{clipboardData:dt,bubbles:true,cancelable:true}));
-   document.execCommand('insertText',false,'\n'+text);
-  }catch(e){
-   document.execCommand('insertText',false,text+'\n[screenshot captured]');
+  }else{
+   try{
+    const b64=base64.replace(/-/g,'+').replace(/_/g,'/');
+    const raw=atob(b64);
+    const buf=new Uint8Array(raw.length);
+    for(let i=0;i<raw.length;i++)buf[i]=raw.charCodeAt(i);
+    const f=new File([buf],'screenshot.png',{type:'image/png'}),dt=new DataTransfer();
+    dt.items.add(f);
+    el.dispatchEvent(new ClipboardEvent('paste',{clipboardData:dt,bubbles:true,cancelable:true}));
+    document.execCommand('insertText',false,'\n'+text);
+   }catch(e){
+    // textarea fallback: embed as markdown image
+    document.execCommand('insertText',false,`\n![screenshot](data:image/png;base64,${base64})\n`+text);
+   }
   }
- }
  const btn=document.querySelector(btnSel);
  if(btn)setTimeout(()=>btn.click(),150);
 }
@@ -160,7 +161,7 @@ async function _execCall(call){
  let args=call.args;
  if(isEdit){
   args=await _approveMultiEdit(call);
-  if(!args){setStatus("#0c0","Skipped (rejected)");return}
+  if(!args){setStatus("#0c0","Skipped (rejected)");_processQueue();return}
  }
  setStatus("#7c5cfc",`${isEdit?'[APPROVED] ':''}Running ${call.name}...`);
  chrome.runtime.sendMessage({type:"call_tool",name:call.name,arguments:args,timeout:120000},r=>{
@@ -170,7 +171,15 @@ async function _execCall(call){
   if(imgs.length>0)_injectImage(imgs[0].data||imgs[0],"[Result]\n"+rt);
   else P.send("[Result]\n"+rt);
   setStatus("#0c0","Agent running");
+  _processQueue();
  });
+}
+function _processQueue(){
+ _isProcessing=false;
+ if(S._queue.length===0)return;
+ const call=S._queue.shift();
+ if(SAFE.includes(call.name)||call.name==='multi_edit'){_isProcessing=true;_execCall(call)}
+ else{setStatus("#f55",`Blocked: ${call.name} not in SAFE`);_processQueue()}
 }
 
 function poll(){
@@ -184,10 +193,12 @@ function poll(){
  if(!text)return;
  const call=ZSParse.parse(text);
  if(!call)return;
- if(SAFE.includes(call.name))return _execCall(call);
- // for multi_edit, the approval gate is inside _execCall
+ if(!SAFE.includes(call.name)&&call.name!=='multi_edit'){setStatus("#f55",`Blocked: ${call.name} not in SAFE`);return}
+ if(_isProcessing){S._queue.push(call);return}
+ _isProcessing=true;
  _execCall(call);
 }
+let _isProcessing=false;
 
 // ── Status ──
 chrome.runtime.onMessage.addListener(msg=>{
@@ -205,4 +216,5 @@ chrome.runtime.sendMessage({type:"status"},r=>{
 
 buildUI();
 var P=typeof ZSProvider!=="undefined"?ZSProvider:null;
+try{chrome.storage.local.get(['zsp','zsm'],r=>{if(r){if(r.zsp)S.customPrompt=r.zsp;if(r.zsm)S.memory=r.zsm}})}catch{}
 })();

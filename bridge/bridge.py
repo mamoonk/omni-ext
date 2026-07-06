@@ -380,11 +380,17 @@ async def hdl(ws):
   _log(f"ext disconnected [{len(ws_clients)} client(s)]","93")
 
 async def sw():
+ backoff={}
  while True:
   await asyncio.sleep(5)
   for sid,c in list(mgr.cl.items()):
    try:
-    if not c.is_a(): _log(f"[{sid}] dead, auto-restart","93"); await asyncio.to_thread(c.start); mgr._rbi()
+    if not c.is_a():
+     b=backoff.get(sid,1)
+     if b>60:continue
+     _log(f"[{sid}] dead, auto-restart (backoff {b}s)","93"); await asyncio.to_thread(c.start); mgr._rbi()
+     if c.is_a():backoff[sid]=1
+     else:backoff[sid]=min(b*2,120)
    except Exception as e: _log(f"[{sid}] auto-restart fail: {e}","91")
 
 async def stw(ia,ip=None):
