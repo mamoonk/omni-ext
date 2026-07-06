@@ -1,0 +1,21 @@
+#zs-bar{position:fixed;top:0;left:0;right:0;z-index:99999;background:#1a1a2e;color:#eee;padding:4px 12px;font:13px/1.4 sans-serif;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,.4);height:36px;box-sizing:border-box}
+#zs-bar button{font-family:inherit}
+#zs-bar .zs-dot{font-size:16px;margin-right:4px;transition:color .3s}
+#zs-bar .zs-lbl{font-size:12px;color:#999}
+#zs-toggle{margin-left:auto;padding:3px 12px;border:1px solid #7c5cfc;border-radius:4px;background:transparent;color:#7c5cfc;cursor:pointer;font-size:12px;transition:background .2s}
+#zs-toggle:hover{background:#7c5cfc33}
+#zs-toggle.active{border-color:#ff5555;color:#ff5555}
+#zs-toggle.active:hover{background:#ff555533}
+.zs-btn{padding:2px 8px;border:1px solid #555;border-radius:4px;background:transparent;color:#aaa;cursor:pointer;font-size:14px;transition:background .2s}
+.zs-btn:hover{background:#ffffff15}
+#zs-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:rgba(0,0,0,.7);justify-content:center;align-items:flex-start;padding:60px 20px;overflow-y:auto}
+#zs-modal-content{background:#1a1a2e;color:#eee;border-radius:8px;max-width:800px;width:100%;padding:20px;font:13px/1.4 monospace;box-shadow:0 8px 32px rgba(0,0,0,.5);max-height:80vh;overflow-y:auto}
+.zs-diff-header{color:#7c5cfc;font-weight:700;margin-bottom:8px}
+.zs-diff-block{background:#0d0d1a;padding:8px;border-radius:4px;max-height:300px;overflow-y:auto;font-size:12px;line-height:1.5;white-space:pre-wrap;font-family:monospace;margin-bottom:10px}
+.zs-diff-rem{color:#f55;background:#2d1111}
+.zs-diff-add{color:#5f5;background:#112d11}
+.zs-diff-ln{color:#888;border-bottom:1px solid #222}
+.zs-btn-approve{padding:6px 20px;border:1px solid #5f5;border-radius:4px;background:transparent;color:#5f5;cursor:pointer;font-size:13px}
+.zs-btn-reject{padding:6px 20px;border:1px solid #f55;border-radius:4px;background:transparent;color:#f55;cursor:pointer;font-size:13px}
+.zs-btn-approve:hover{background:#5f5c22}
+.zs-btn-reject:hover{background:#f55c22}

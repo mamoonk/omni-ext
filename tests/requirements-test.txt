@@ -1,0 +1,4 @@
+# Test dependencies for Omni-Ext
+pytest>=7.4
+pytest-cov>=4.1
+websockets>=12.0
