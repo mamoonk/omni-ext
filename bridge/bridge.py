@@ -84,7 +84,7 @@ class MCPC:
    s._rt=threading.Thread(target=s._rd,args=(s.proc,),daemon=True); s._rt.start()
    threading.Thread(target=s._sed,args=(s.proc,),daemon=True).start()
    s._rq("initialize",{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"zs-bridge","version":"1.0"}},30)
-    s._nf("notifications/initialized")
+   s._nf("notifications/initialized")
    for _ in range(12):
     if s.rf_t(3): break
     if not s.is_a(): break
